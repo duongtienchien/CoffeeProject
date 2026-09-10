@@ -42,7 +42,7 @@ namespace CoffeeShop.API.OrderController
                 // 3. Trả về mã 201 kèm cái hóa đơn cho Frontend in ra bill
                 return StatusCode(201, new
                 {
-                    message = "Ok rồi nhé, bill của bro đây",
+                    message = "Ok rồi nhé, bill của bạn đây",
                     data = responseDto
                 });
             }
@@ -67,7 +67,7 @@ namespace CoffeeShop.API.OrderController
 
                 var staffName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Nhân viên Vô Danh";
 
-                // BƯỚC 4: Lễ tân gọi BLL xử lý, truyền cục data vừa bóc được từ Token xuống
+                // Lễ tân gọi BLL xử lý, truyền cục data vừa bóc được từ Token xuống
                 var response = await _orderService.ConfirmPaymentAsync(request, staffId, staffName);
 
                 return Ok(response);
@@ -87,7 +87,7 @@ namespace CoffeeShop.API.OrderController
             }
         }
         [HttpPost("{orderId}/cancel")]
-        [Authorize(Roles = "Staff,Manager")] // Kẹp Token vào, cho phép cả Staff và Manager hủy đơn
+        [Authorize(Roles = "Staff,Manager")] 
         public async Task<IActionResult> CancelOrder(Guid orderId, [FromBody] CancelOrderRequestDto request)
         {
             try
@@ -145,7 +145,7 @@ namespace CoffeeShop.API.OrderController
         [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetOrdersByStore(int storeId)
         {
-            // Đệ gọi xuống Service/Repo để lấy đơn hàng where StoreId == storeId
+            // Gọi xuống Service/Repo để lấy đơn hàng where StoreId == storeId
             var orders = await _orderService.GetOrdersByStoreIdAsync(storeId);
 
             return Ok(new

@@ -2,20 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-//Chống bruteforce
 using Microsoft.AspNetCore.RateLimiting;
 using CoffeeShop.DAL.Data;         
-using CoffeeShop.DAL.Repositories; 
-using CoffeeShop.DAL.Interfaces;   
-using CoffeeShop.BLL.Services;     
-using CoffeeShop.BLL.Interfaces; 
-using Microsoft.OpenApi;  
+using Microsoft.OpenApi; 
+using CoffeeShop.API.Extensions; 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. ĐĂNG KÝ CỔNG ---
 builder.Services.AddControllers();
-builder.Services.AddScoped<BruteForceService>();
 // Lấy thông tin cấu hình JWT từ file appsetiings.json
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
@@ -45,18 +40,26 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         
-        // "Bẫy" Junior hay dính: Mặc định .NET Core sẽ cộng thêm 5 phút bù trừ chênh lệch thời gian (ClockSkew).
         // Đặt về Zero để Token hết hạn chính xác từng giây theo cấu hình.
         ClockSkew = TimeSpan.Zero, 
     };
     options.Events = new JwtBearerEvents
+    
+{
+    OnMessageReceived = context =>
     {
-        OnMessageReceived = context =>
+        // 1. Kiểm tra xem có Token ở Header không (do Swagger gửi)
+        var hasAuthHeader = context.Request.Headers.ContainsKey("Authorization");
+        
+        // 2. Nếu KHÔNG có ở Header (nghĩa là gọi từ Web của đệ), thì mới móc từ Cookie ra
+        if (!hasAuthHeader && context.Request.Cookies.ContainsKey("accessToken"))
         {
             context.Token = context.Request.Cookies["accessToken"];
-            return Task.CompletedTask;
         }
-    };
+        
+        return Task.CompletedTask;
+    }
+};
 });
 // 3. Cấu hình Authorization Service (Phân quyền nâng cao bằng Policy)
 builder.Services.AddAuthorization(options =>
@@ -115,52 +118,7 @@ c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 
 });
 });
-builder.Services.AddScoped<AccountRepository>();
-builder.Services.AddScoped<OrderRepository>();
-builder.Services.AddScoped<InventoryRepository>();
-builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<ProductRepository>();
-builder.Services.AddScoped<StaffService>();
-builder.Services.AddScoped<StaffRepository>();
-builder.Services.AddScoped<BruteForceRepository>();
-builder.Services.AddScoped<PasswordHasher>();
-builder.Services.AddScoped<ProductRecipeRepository>();
-builder.Services.AddScoped<StoreInventoryRepository>();
-builder.Services.AddScoped<SystemAuditLogRepository>();
-builder.Services.AddScoped<InventoryRepository>();
-builder.Services.AddScoped<InventoryService>();
-builder.Services.AddScoped<UserProfileService>();
-builder.Services.AddScoped<ProductService>();
-
-
-
-// "Hễ ai đòi IUserRepository, hãy đưa cho nó class UserRepository"
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IBruteForceService, BruteForceService>();
-
-
-// "Hễ ai đòi IAuthService, hãy đưa cho nó class AuthService"
-builder.Services.AddScoped<IAuthService, AuthService>();
-// CoffeeShop.BLL.TokenService từ trái qua là namespace tức hộ khẩu của nó !
-builder.Services.AddScoped<TokenService>();
-// Đăng ký Repository với vòng đời Scoped (mỗi HTTP Request tạo 1 instance)
-builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
-// Đăng ký Repository (Nếu đệ chưa đăng ký)
-builder.Services.AddScoped<SystemAuditLogRepository>();
-
-// Đăng ký Service mới tinh lúc nãy
-builder.Services.AddScoped<SystemAuditLogService>();
-// 1. Đăng ký cho Repository trước (Vì Service cần Repo để chọc xuống DB)
-builder.Services.AddScoped<ManagerRepository>();
-
-// 2. Sau đó đăng ký cho Service (Vì Controller cần Service để xử lý logic)
-builder.Services.AddScoped<ManagerService>();
-
-builder.Services.AddScoped<ShiftRepository>();
-builder.Services.AddScoped<ShiftService>();
-
-
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 

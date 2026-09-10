@@ -48,7 +48,7 @@ namespace CoffeeShop.API.Controllers
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,  //Khi nào chạy production thì nhớ để true
+                    Secure = true,  
                     SameSite = SameSiteMode.Lax,
                     Expires = DateTime.UtcNow.AddDays(1)
                 };
@@ -58,7 +58,7 @@ namespace CoffeeShop.API.Controllers
 
                 return Ok(new
                 {
-                    message = "Đăng nhập thành công, token THẬT đã được cất vào két sắt!",
+                    message = "Đăng nhập thành công, token thật đã được cất vào két sắt!",
                     data = result
                 });
             }
@@ -71,9 +71,8 @@ namespace CoffeeShop.API.Controllers
         [AllowAnonymous] // Ai cũng có quyền bấm đăng xuất
         public IActionResult Logout()
         {
-            // Lệnh cho trình duyệt xoá cái bánh quy mang tên "accessToken"
             Response.Cookies.Delete("accessToken");
-            return Ok(new { message = "Đăng xuất thành công, đã thu hồi lệnh bài!" });
+            return Ok(new { message = "Đăng xuất thành công !" });
         }
         [HttpGet("me")]
         [Authorize]         

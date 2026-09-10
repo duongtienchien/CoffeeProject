@@ -19,7 +19,10 @@ namespace CoffeeShop.API.ManagerController
 
 
         // DI tiêm Service vào Controller
-        public ManagerController(InventoryService inventoryService, UserProfileService userprofileService, SystemAuditLogService auditLogService, ManagerService managerService)
+        public ManagerController(InventoryService inventoryService, 
+        UserProfileService userprofileService, 
+        SystemAuditLogService auditLogService, 
+        ManagerService managerService)
         {
             _inventoryService = inventoryService;
             _userprofileService = userprofileService;
@@ -36,7 +39,7 @@ namespace CoffeeShop.API.ManagerController
         }
 
         [Authorize(Roles = "Manager")]
-        [HttpGet("inventory-transactions")]
+        [HttpGet("inventory-transactions/{storeId}")]
         public async Task<IActionResult> GetInventoryTransactions()
         {
 
@@ -80,12 +83,12 @@ namespace CoffeeShop.API.ManagerController
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("staffs")]
-        public async Task<IActionResult> GetStaffs()
+        [HttpGet("staffs/{storeId}")]
+        public async Task<IActionResult> GetStaffs(int storeId)
         {
             try
             {
-                var staffList = await _managerService.GetAllStaffsWithShiftDataAsync();
+                var staffList = await _managerService.GetAllStaffsWithShiftDataAsync(storeId);
                 return Ok(new { data = staffList });
             }
             catch (Exception ex)
@@ -99,20 +102,18 @@ namespace CoffeeShop.API.ManagerController
         {
             try
             {
-                // 1. Controller chỉ làm nhiệm vụ bóc vé lấy Email
                 var email = User.FindFirst(ClaimTypes.Email)?.Value
                          ?? User.FindFirst(ClaimTypes.Name)?.Value;
 
                 if (string.IsNullOrEmpty(email))
                     return Unauthorized(new { message = "Token không hợp lệ hoặc thiếu Email" });
 
-                // 2. Controller sai khiến Service đi lấy dữ liệu
                 var myInfo = await _userprofileService.GetMyProfileAsync(email);
 
                 if (myInfo == null)
                     return NotFound(new { message = "Không tìm thấy người dùng" });
 
-                // 3. Trả hàng về cho Frontend
+                //Trả hàng về cho Frontend
                 return Ok(new { data = myInfo });
             }
             catch (Exception ex)
@@ -120,14 +121,20 @@ namespace CoffeeShop.API.ManagerController
                 return StatusCode(500, new { message = "Lỗi Server: " + ex.Message });
             }
         }
-        [HttpGet("system-warnings")]
+        [HttpGet("system-warnings/{storeId}")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> GetSystemWarnings()
+        public async Task<IActionResult> GetSystemWarnings(int storeId) //Hứng tham số storeId
         {
+            if (storeId <= 0)
+            {
+                return BadRequest(new { message = "Mã chi nhánh không hợp lệ!" });
+            }
+
             try
             {
-                // Controller cực nhàn, chỉ gọi BLL và bọc kết quả lại
-                var warnings = await _auditLogService.GetRecentWarningsAsync(3);
+                //Truyền storeId xuống tầng Service (BLL)
+                var warnings = await _auditLogService.GetSystemWarningsByStoreAsync(storeId);
+                
                 return Ok(new { data = warnings });
             }
             catch (Exception ex)
@@ -136,7 +143,7 @@ namespace CoffeeShop.API.ManagerController
             }
         }
         [HttpPost("adjust-inventory")]
-        [Authorize(Roles = "Manager")] // Rào kẽm gai: Chỉ Manager mới được qua
+        [Authorize(Roles = "Manager")] 
         public async Task<IActionResult> AdjustInventory([FromBody] AdjustInventoryRequest request)
         {
             try
@@ -156,7 +163,7 @@ namespace CoffeeShop.API.ManagerController
                 return Ok(new
                 {
                     success = true,
-                    message = "Điều chỉnh kho thành công! Đã ghi nhận vào sổ cái."
+                    message = "Điều chỉnh kho thành công! Đã ghi nhận vào sổ."
                 });
             }
             catch (Exception ex)
