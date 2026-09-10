@@ -26,7 +26,7 @@ Hệ thống được thiết kế chặt chẽ theo Kiến trúc phân tầng (
 * **API Documentation:** Swagger / OpenAPI
 
 ## Project Structure
-Được chia thành ba lớp chính để tuân thủ nghiêm ngặt Nguyên lý Đảo ngược Phụ thuộc (Dependency Inversion Principle).
+```text
 CoffeeShop.Solution/
 │
 ├── Frontend
@@ -38,10 +38,11 @@ CoffeeShop.Solution/
 │   └── CoffeeShop.Models/   # Lớp Thực Thể (Entities: Auth, Catalog, Sales, System)
 │
 ├── Testing & Tools
-│   └── RaceConditionTester/ # Tool test tương tranh (Dùng để kiểm chứng cơ chế Khóa lạc quan - Optimistic Locking)
+│   └── RaceConditionTester/ # Tool test tương tranh (Dùng để kiểm chứng cơ chế Khóa lạc quan – Optimistic Locking)
 │
 ├── CoffeeShop.sln           # Visual Studio Solution file
 └── README.md                # Project documentation
+```
 
 ## Công Nghệ Sử Dụng (Tech Stack)
 * **Backend:** .NET 8 (C# RESTful API), Entity Framework Core.
