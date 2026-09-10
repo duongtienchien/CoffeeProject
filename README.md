@@ -51,35 +51,49 @@ CoffeeShop.Solution/
 
 ## Hướng Dẫn Khởi Chạy (Getting Started)
 
-**Yêu Cầu Hệ Thống (Prerequisites)**
-* Đã cài đặt .NET SDK (Phiên bản tương ứng với dự án).
-* Đã cài đặt Node.js & npm (Bắt buộc để chạy môi trường Vite).
-* Một tài khoản cơ sở dữ liệu PostgreSQL (Khuyến nghị Neon Serverless).
+### Yêu Cầu Hệ Thống (Prerequisites)
+* **.NET SDK 8.0** trở lên
+* **Node.js** (khuyến nghị v18 trở lên) & **npm**
 
-Setup Backend
-1. Cấu hình bảo mật:
+---
 
-Copy file appsettings.json hiện có sang một file mới và đặt tên là appsettings.Development.json.
+### 1. Khởi Chạy Backend (.NET 8 Web API)
+Dự án đã tích hợp sẵn cơ chế **Auto-Migration** và **Data Seeding** tự động kết nối với NeonDB:
 
-Cập nhật chuỗi kết nối Database (DefaultConnection) và cấu hình Token (JwtSettings) bên trong file appsettings.Development.json mới này.
-(Lưu ý: File này đã được khai báo bỏ qua trong git-ignore để ngăn chặn việc rò rỉ dữ liệu nhạy cảm).
-
-2. Cập nhật Cơ sở dữ liệu (Apply Migrations):
 ```bash
 cd CoffeeShop.API
-dotnet ef database update --project ../CoffeeShop.DAL
+dotnet run
+```
+* **Swagger UI:** Truy cập theo đường dẫn mặc định hiển thị trên Terminal (thường là `https://localhost:5079/swagger` hoặc `http://localhost:5079/swagger`).
 
-3. Khởi chạy API:
-```bash
-dotnet run --project CoffeeShop.API
+---
 
-4. Cài Đặt Frontend (Setup Frontend):
+### 2. Khởi Chạy Frontend (React / Vite)
+Mở một cửa sổ Terminal mới và chạy các lệnh sau:
+
 ```bash
 cd CoffeeShop.FrontEnd
 npm install
 npm run dev
+```
+* **Giao diện Client:** Mặc định truy cập tại `http://localhost:5173`.
 
-Author
-Dương Tiến Chiến * Backend Developer
+---
 
-GitHub: @ChinChin2k5
+### 3. Tài Khoản Trải Nghiệm Mẫu (Demo Credentials)
+
+Hệ thống đã nạp sẵn các tài khoản phân quyền mẫu phục vụ quá trình test chức năng:
+
+| Vai trò | Email đăng nhập | Mật khẩu | Chi nhánh |
+| :--- | :--- | :--- | :--- |
+| **Manager (Quản lý)** | `manager.cg@coffeeshop.com` | `Manager@123` | Cầu Giấy |
+| **Staff (Nhân viên)** | `staff1.cg@coffeeshop.com` | `Staff@123` | Cầu Giấy |
+| **Manager (Quản lý)** | `manager.dd@coffeeshop.com` | `Manager@123` | Đống Đa |
+| **Staff (Nhân viên)** | `staff1.dd@coffeeshop.com` | `Staff@123` | Đống Đa |
+
+---
+
+## Tác Giả (Author)
+
+* **Dương Tiến Chiến** – *Backend Developer*
+* **GitHub:** [@ChinChin2k5](https://github.com/ChinChin2k5)
