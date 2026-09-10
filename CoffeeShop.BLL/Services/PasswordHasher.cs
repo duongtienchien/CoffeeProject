@@ -1,4 +1,3 @@
-using BCrypt.Net;
 public class PasswordHasher 
 {
     public string Hash(string plainPassword)

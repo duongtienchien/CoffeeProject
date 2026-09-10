@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using CoffeeShop.Models.Entities.Sales;
-using CoffeeShop.Models.Entities.Auth;
 
 namespace CoffeeShop.DAL.Configurations
 {
@@ -19,6 +18,11 @@ namespace CoffeeShop.DAL.Configurations
                    .WithOne(od => od.Order) // Điền rõ navigation property vào đây
                    .HasForeignKey(od => od.OrderId)
                    .OnDelete(DeleteBehavior.Cascade);
+            // Một đơn hàng do MỘT nhân viên (User) tạo ra
+            builder.HasOne(o => o.Staff) 
+                   .WithMany()
+                   .HasForeignKey(o => o.StaffId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho - MyCafeProject</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: { 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        amber: { 100: '#fef3c7', 700: '#b45309' },
+                        red: { 100: '#fee2e2', 600: '#dc2626' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+    <!-- Header chung -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-xl">
+                <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Quản Lý Quán Cà Phê</h1>
+                <p class="text-sm text-gray-500">Bảng Quản Lý Cửa Hàng</p>
+            </div>
+        </div>
+        <!-- Cắt đoạn Header cũ đi, thay bằng đoạn này -->
+<div class="flex items-center gap-3">
+    <div class="text-right">
+        <!-- Đặt ID header-fullname và header-role -->
+        <p id="header-fullname" class="text-sm font-semibold text-gray-900">Đang tải...</p>
+        <p id="header-role" class="text-xs text-gray-500">...</p>
+    </div>
+    
+    <!-- Đặt ID cho khối Avatar -->
+    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold overflow-hidden border border-emerald-200">
+        <!-- Text viết tắt (SJ) nếu không có ảnh -->
+        <span id="header-initials" class="tracking-wide">...</span>
+        <!-- Thẻ img thật (bị ẩn mặc định) -->
+        <img id="header-avatar-img" src="" alt="Avatar" class="w-full h-full object-cover hidden">
+    </div>
+</div>
+    </header>
+
+    <!-- Thanh Menu: Nút Nhập Hàng sáng xanh -->
+    <nav class="bg-white border-b border-gray-200 px-6 flex gap-8">
+        <a href="manager-order.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+            <i class="fa-solid fa-file-invoice"></i> Quản Lý Order
+        </a>
+        <a href="manager-inventory.html" class="flex items-center gap-2 py-4 border-b-2 border-emerald-600 text-emerald-600 font-semibold">
+            <i class="fa-solid fa-box-open"></i> Quản Lý Nhập Hàng
+        </a>
+        <a href="manager-mostaff.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+            <i class="fa-solid fa-users-gear"></i> Quản Lý Dòng Tiền & Staff
+        </a>
+        <div class="flex-grow"></div> 
+        <button id="btnLogout" class="flex items-center gap-2 py-4 text-red-600 font-medium hover:text-red-700">
+            <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+        </button>
+    </nav>
+
+    <main class="p-6 max-w-7xl mx-auto">
+        <!-- Bộ chọn chi nhánh -->
+        <select id="branchSelector" class="border p-2 rounded-lg mb-6 shadow-sm">
+            <option value="1">Chi nhánh 1 (Cầu Giấy)</option>
+            <option value="2">Chi nhánh 2 (Đống Đa)</option>
+        </select>
+
+        <!-- KHU VỰC KHO (Đã gỡ class hidden) -->
+        <div id="inventoryContent">
+            <!-- Cảnh báo hết hàng -->
+            <div id="inventory-warnings-container" class="mb-4">
+    <!-- JS sẽ tự động nhét các cục Cảnh báo Tồn kho và Cảnh báo Mất cắp vào đây -->
+</div>
+
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center mb-6">
+                <div class="flex-grow relative">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" placeholder="Tìm kiếm nguyên liệu..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500">
+                </div>
+                <button class="bg-emerald-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">
+                    Tạo Đơn Nhập Hàng
+                </button>
+            </div>
+
+            <!-- Bảng Tồn Kho -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wider uppercase">
+                            <th class="p-4">Tên Thành Phần</th>
+                    <th class="p-4">Nhà Cung Cấp</th>
+                    <th class="p-4">Kho Chứa Hiện Tại</th>
+                    <th class="p-4">Trạng Thái</th>
+                    <th class="p-4 text-center">Điều Chỉnh Kho</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body" class="divide-y divide-gray-200 text-sm text-gray-800">
+                        <!-- JS bơm data vào đây -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Bảng Lịch sử -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Lịch Sử Nhập/Xuất Kho</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b">
+                                <th class="p-4 font-medium rounded-tl-lg">Thời gian</th>
+                    <th class="p-4 font-medium">Mã NV</th>
+                    <th class="p-4 font-medium">Mã Món (Item)</th>
+                    <th class="p-4 font-medium">Loại GD</th>
+                    <th class="p-4 font-medium">Số lượng</th>
+                    <th class="p-4 font-medium rounded-tr-lg">Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-body" class="text-sm text-gray-700 divide-y divide-gray-100">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-400">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../src/js/guard.js"></script>
+    <script src="../src/js/logout.js"></script>
+    <script src="/src/js/api.js"></script>
+    <script src="../src/js/manager.js"></script>
+</body>
+</html>

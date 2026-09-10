@@ -1,4 +1,3 @@
-using CoffeeShop.Models.Entities.Auth;
 namespace CoffeeShop.BLL.DTOs.Inventory.Requests 
 {
     public class LoginRequests

@@ -8,6 +8,6 @@ namespace CoffeeShop.BLL.Interfaces
 
         Task CountBruteForce(User user);
 
-        Task ResetFalledAttemptAsync(User user);
+        Task ResetFailedAttemptAsync(User user);
     }
 }

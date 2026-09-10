@@ -7,7 +7,7 @@ namespace CoffeeShop.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-            builder.ToTable("Customer");
+            builder.ToTable("Customers");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.FullName).IsRequired().HasMaxLength(200);
             builder.Property(e => e.PhoneNumber).IsRequired().HasMaxLength(20);

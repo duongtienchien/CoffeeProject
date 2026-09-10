@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoStaff Dashboard - MyCafeProject</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: { 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        amber: { 100: '#fef3c7', 700: '#b45309' },
+                        purple: { 100: '#f3e8ff', 600: '#9333ea' },
+                        blue: { 100: '#dbeafe', 600: '#2563eb' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+    <!-- Header chung -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-xl">
+                <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Quản Lý Quán Cà Phê</h1>
+                <p class="text-sm text-gray-500">Bảng Quản Lý Cửa Hàng</p>
+            </div>
+        </div>
+        <!-- Cắt đoạn Header cũ đi, thay bằng đoạn này -->
+<div class="flex items-center gap-3">
+    <div class="text-right">
+        <!-- Đặt ID header-fullname và header-role -->
+        <p id="header-fullname" class="text-sm font-semibold text-gray-900">Đang tải...</p>
+        <p id="header-role" class="text-xs text-gray-500">...</p>
+    </div>
+    
+    <!-- Đặt ID cho khối Avatar -->
+    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold overflow-hidden border border-emerald-200">
+        <!-- Text viết tắt (SJ) nếu không có ảnh -->
+        <span id="header-initials" class="tracking-wide">...</span>
+        <!-- Thẻ img thật (bị ẩn mặc định) -->
+        <img id="header-avatar-img" src="" alt="Avatar" class="w-full h-full object-cover hidden">
+    </div>
+</div>
+    </header>
+
+    <!-- Thanh Menu: Nút MoStaff sáng xanh -->
+    <nav class="bg-white border-b border-gray-200 px-6 flex gap-8">
+        <a href="manager-order.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+            <i class="fa-solid fa-file-invoice"></i> Quản Lý Order
+        </a>
+        <a href="manager-inventory.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+            <i class="fa-solid fa-box-open"></i> Quản Lý Nhập Hàng
+        </a>
+        <a href="manager-mostaff.html" class="flex items-center gap-2 py-4 border-b-2 border-emerald-600 text-emerald-600 font-semibold">
+            <i class="fa-solid fa-users-gear"></i> Quản Lý Dòng Tiền & Staff
+        </a>
+        <div class="flex-grow"></div> 
+        <button id="btnLogout" class="flex items-center gap-2 py-4 text-red-600 font-medium hover:text-red-700">
+            <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+        </button>
+    </nav>
+
+    <main class="p-6 max-w-7xl mx-auto">
+        <!-- Bộ chọn chi nhánh -->
+        <select id="branchSelector" class="border p-2 rounded-lg mb-6 shadow-sm">
+            <option value="1">Chi nhánh 1 (Cầu Giấy)</option>
+            <option value="2">Chi nhánh 2 (Đống Đa)</option>
+        </select>
+<div id="cash-warnings-container" class="mb-6 flex flex-col gap-3">
+    <!-- JS sẽ nhét các cảnh báo lệch két vào đây -->
+</div>
+        <!-- KHU VỰC MOSTAFF (Đã gỡ class hidden) -->
+        <div id="mostaffContent">
+            
+
+            <!-- BẢNG DANH SÁCH NHÂN VIÊN KẾT HỢP DOANH THU -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-900 text-lg">Danh Sách Nhân Viên & Hiệu Suất Bán Hàng</h3>
+                    <button class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> Thêm Nhân Viên
+                    </button>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wider uppercase">
+                            <th class="p-4">Mã NV</th>
+        <th class="p-4">Hồ Sơ (Avatar & Tên)</th>
+        <th class="p-4">Tài Khoản</th>
+        <!-- 3 CỘT MỚI THAY THẾ CHO CỘT DOANH THU CŨ -->
+        <th class="p-4 text-right">Hệ Thống Tính</th>
+        <th class="p-4 text-right">Thực Nộp</th>
+        <th class="p-4 text-right">Chênh Lệch</th>
+        <th class="p-4 text-center">Trạng Thái</th>
+        <th class="p-4 text-right">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody" class="divide-y divide-gray-200 text-sm text-gray-800">
+                        <!-- JS manager.js loadStaffs() sẽ bơm html có ảnh thẻ Avatar vào đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="../src/js/guard.js"></script>
+    <script src="../src/js/logout.js"></script>
+    <script src="/src/js/api.js"></script>
+    <script src="../src/js/manager.js"></script>
+</body>
+</html>

@@ -14,11 +14,10 @@ const formatEmailError = document.getElementById('formatEmailError');
 const blankPasswordError = document.getElementById('blankPasswordError');
 const minimumPasswordError = document.getElementById('minimumPasswordError');
 
-// Khối UI Role & Admin
+// Khối UI Role
 const btnStaff = document.getElementById('btn-staff');
 const btnManager = document.getElementById('btn-manager');
 const logo = document.getElementById('shop-logo');
-const adminModal = document.getElementById('admin-modal');
 const btnLogin = document.getElementById('btn-login');
 
 // ==========================================
@@ -49,110 +48,10 @@ function togglePassword(inputId) {
     input.type = input.type === "password" ? "text" : "password";
 }
 
-// ==========================================
-// 3. BACKDOOR ADMIN (NHẤN GIỮ LOGO 3 GIÂY)
-// ==========================================
-let pressTimer;
-
-// ==========================================
-// 3. BACKDOOR ADMIN (GÕ CỬA 5 LẦN TRONG 2 GIÂY)
-// ==========================================
-let clickCount = 0;
-let clickTimer;
-
-// Chiêu 1: Gõ cửa logo
-logo.addEventListener('click', (e) => {
-    e.preventDefault();
-    clickCount++; // Mỗi lần click là đếm +1
-
-    // Nếu là cú click đầu tiên, bắt đầu bấm giờ 2 giây
-    if (clickCount === 1) {
-        clickTimer = setTimeout(() => {
-            // Hết 2 giây mà chưa gõ đủ 5 phát -> Reset về 0. Bắt gõ lại từ đầu!
-            clickCount = 0; 
-        }, 2000); 
-    }
-
-    // Đạt đủ 5 combo liên tiếp -> Mở cửa không gian!
-    if (clickCount === 5) {
-        clearTimeout(clickTimer); // Hủy bấm giờ
-        clickCount = 0; // Reset để lần sau còn dùng được
-        
-        // Hiệu ứng giật logo nhẹ 1 cái cho ngầu
-        logo.classList.add('scale-90');
-        setTimeout(() => logo.classList.remove('scale-90'), 150);
-
-        // Mở Modal
-        adminModal.classList.remove('hidden');
-        adminModal.classList.add('flex');
-    }
-});
-
-// Chiêu 2: Bùa gỡ rối cho Dev (Chỉ dùng được trên Máy tính)
-// Bí kíp: Nhấn tổ hợp phím "Ctrl + Shift + A" ở bất kỳ đâu trên màn hình Lễ Tân
-document.addEventListener('keydown', (e) => {
-    // Nếu bấm đúng Ctrl + Shift + A thì mở Modal
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        adminModal.classList.remove('hidden');
-        adminModal.classList.add('flex');
-    }
-});
-
-function closeAdminModal() {
-    adminModal.classList.add('hidden');
-    adminModal.classList.remove('flex');
-    document.getElementById('keyInput').value = ''; 
-}
-
-// ... (Giữ nguyên hàm loginAdmin của sếp ở dưới) ...
-
 
 function cancelPress() {
     clearTimeout(pressTimer);
     logo.classList.replace('scale-95', 'scale-100');
-}
-
-/*logo.addEventListener('mousedown', startPress);
-logo.addEventListener('mouseup', cancelPress);
-logo.addEventListener('mouseleave', cancelPress);
-logo.addEventListener('touchstart', startPress, {passive: false});
-logo.addEventListener('touchend', cancelPress);*/
-
-function closeAdminModal() {
-    adminModal.classList.add('hidden');
-    adminModal.classList.remove('flex');
-    // Sửa ID thành 'keyInput'
-    document.getElementById('keyInput').value = ''; 
-}
-async function loginAdmin() {
-    // Sửa ID thành 'keyInput'
-    const keyInput = document.getElementById('keyInput').value; 
-    
-    try {
-        const response = await fetch('http://localhost:5059/api/auth/verify-backdoor', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            //Dòng này cho phép hai cổng giao tiếp được với nhau thông qua Cookie 
-            credentials: 'include',
-            body: JSON.stringify(keyInput)
-        });
-        //Chỗ này mình thiếu, biến cái response thành dữ liệu đọc được
-        const data = await response.json();
-
-        if (response.ok) {
-            // 2. Cất vé VIP vào Balo
-            console.log("Cấu trúc toàn bộ data gốc:", data);
-            localStorage.setItem('userRole', data.data.role); 
-            // 3. Mới được chuyển trang
-            window.location.href = '/Admin/admin.html';
-        } else {
-            alert('Còi báo động: Mã truy cập sai!');
-            closeAdminModal(); 
-        }
-    } catch (error) {
-        console.error(error);
-    }
 }
 
 // ==========================================
@@ -237,12 +136,10 @@ loginForm.addEventListener('submit', async function(event) {
                 return;
             }
             //Cất đồ vào trong Local Storage
-            localStorage.setItem('userRole', realRole);
+            localStorage.setItem('userInfo', JSON.stringify(data.data));
             // 2. Chuyển hướng người dùng dựa theo role
-            if (realRole === 'Admin') {
-                window.location.href = '/Admin/admin.html';
-            } else if (realRole === 'Manager') {
-                window.location.href = '/Manager/manager.html';
+            if (realRole === 'Manager') {
+                window.location.href = '/Manager/manager-order.html';
             } else {
                 window.location.href = '/Staff/staff.html';
             }

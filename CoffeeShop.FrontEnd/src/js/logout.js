@@ -1,4 +1,4 @@
-// file: staff.js (hoặc logout.js)
+// file: (hoặc logout.js)
 // Hàm kiểm tra xem user còn quyền truy cập không
 async function checkAuthStatus() {
     try {
@@ -12,13 +12,13 @@ async function checkAuthStatus() {
             document.body.style.opacity = '1';
         } else {
             //Server bảo vé hết hạn -> xé thẻ ngay lập tức!
-            localStorage.removeItem("userRole");
+            localStorage.removeItem("userInfo");
             // SAI VÉ: Để nguyên màn hình trắng và sút ra ngoài
             window.location.replace('/'); 
         }
     } catch (error) {
         // Lỗi kết nối hoặc server sập -> Cũng xé thẻ, đá ra ngoài cho an toàn
-        localStorage.removeItem("userRole");
+        localStorage.removeItem("userInfo");
         window.location.replace('/');
     }
 }
@@ -44,16 +44,16 @@ async function handleLogout() {
 
         // Backend trả về thành công thì đá về trang chủ
         if (response.ok) {
-            localStorage.removeItem("userRole");
+            localStorage.removeItem("userInfo");
             window.location.replace('/');
         } else {
             console.error("Lỗi từ server khi đăng xuất");
-            localStorage.removeItem("userRole");
+            localStorage.removeItem("userInfo");
             window.location.replace('/'); // Lỗi thì cũng đá ra ngoài luôn cho an toàn
         }
     } catch (error) {
         console.error("Lỗi khi đăng xuất:", error);
-        localStorage.removeItem("userRole");
+        localStorage.removeItem("userInfo");
         window.location.replace('/');
     }
 }

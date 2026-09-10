@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Manager Dashboard - MyCafeProject</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Hàm chuyển đổi Tab
+function switchTab(tabName) {
+    // 1. Tắt đèn (giấu) TẤT CẢ các tab
+    const allTabs = ['orders', 'inventory', 'reports'];
+    allTabs.forEach(tab => {
+        document.getElementById(tab + 'Tab').classList.add('hidden');
+    });
+
+    // 2. Bật đèn (hiện) tab vừa được bấm
+    document.getElementById(tabName + 'Tab').classList.remove('hidden');
+
+    // 3. Đổi màu nút bấm trên thanh Nav cho nó xịn (Highlight nút đang chọn)
+    const navButtons = document.querySelectorAll('nav button');
+    
+    // Bỏ cái nút Logout ra khỏi danh sách đổi màu
+    const tabButtons = Array.from(navButtons).slice(0, 3); 
+    
+    tabButtons.forEach(btn => {
+        // Trả các nút về trạng thái xám, không gạch chân
+        btn.classList.remove('border-emerald-600', 'text-emerald-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+        
+        // Nếu nút này là nút vừa được bấm -> Bật viền xanh, chữ xanh
+        if (btn.getAttribute('onclick').includes(tabName)) {
+            btn.classList.remove('border-transparent', 'text-gray-500');
+            btn.classList.add('border-emerald-600', 'text-emerald-600');
+        }
+    });
+    if (tabName === 'staff') {
+    loadStaffs();
+}
+}
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: { 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        amber: { 100: '#fef3c7', 700: '#b45309' },
+                        red: { 100: '#fee2e2', 600: '#dc2626' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../src/js/guard.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-xl">
+                <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Quản Lý Quán Cà Phê</h1>
+                <p class="text-sm text-gray-500">Bảng Quản Lý Cửa Hàng</p>
+            </div>
+        </div>
+        <!-- Cắt đoạn Header cũ đi, thay bằng đoạn này -->
+<div class="flex items-center gap-3">
+    <div class="text-right">
+        <!-- Đặt ID header-fullname và header-role -->
+        <p id="header-fullname" class="text-sm font-semibold text-gray-900">Đang tải...</p>
+        <p id="header-role" class="text-xs text-gray-500">...</p>
+    </div>
+    
+    <!-- Đặt ID cho khối Avatar -->
+    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold overflow-hidden border border-emerald-200">
+        <!-- Text viết tắt (SJ) nếu không có ảnh -->
+        <span id="header-initials" class="tracking-wide">...</span>
+        <!-- Thẻ img thật (bị ẩn mặc định) -->
+        <img id="header-avatar-img" src="" alt="Avatar" class="w-full h-full object-cover hidden">
+    </div>
+</div>
+    </header>
+
+    <nav class="bg-white border-b border-gray-200 px-6 flex gap-8">
+    <a href="manager-order.html" class="flex items-center gap-2 py-4 border-b-2 border-emerald-600 text-emerald-600 font-semibold">
+        <i class="fa-solid fa-file-invoice"></i> Quản Lý Order
+    </a>
+    <a href="manager-inventory.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+        <i class="fa-solid fa-box-open"></i> Quản Lý Nhập Hàng
+    </a>
+    <a href="manager-mostaff.html" class="flex items-center gap-2 py-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+        <i class="fa-solid fa-users-gear"></i> Quản Lý Dòng Tiền & Staff
+    </a>
+    <div class="flex-grow"></div> 
+    <button id="btnLogout" class="flex items-center gap-2 py-4 text-red-600 font-medium hover:text-red-700">
+        <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+    </button>
+</nav>
+
+    <main class="p-6 max-w-7xl mx-auto">
+        <div id="ordersTab">
+            <p class="text-sm text-gray-500 mb-6">Quản Lý / <span class="font-semibold text-gray-800">Quản Lý Order</span></p>
+            <select id="branchSelector" class="border p-2 rounded-lg mb-4">
+    <option value="1">Chi nhánh 1 (Cầu Giấy)</option>
+    <option value="2">Chi nhánh 2 (Đống Đa)</option>
+</select>
+<!-- KHU VỰC HIỂN THỊ CẢNH BÁO TỪ DATABASE -->
+<div id="fraud-warnings-container" class="mb-6 flex flex-col gap-3">
+    <!-- JS sẽ nhét các cảnh báo hủy đơn vào đây -->
+</div>
+        </div>
+        
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-4">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-1">Thu Nhập Hôm Nay</p>
+                <h3 id="stat-revenue" class="text-2xl font-bold text-gray-900 mb-2">0 đ</h3>
+                <p class="text-xs text-emerald-600 font-medium">+12.5% vs yesterday</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg mb-4">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-1">Những Đơn Đã Hoàn Thành</p>
+<h3 id="stat-completed" class="text-2xl font-bold text-gray-900 mb-2">0</h3>                <p class="text-xs text-gray-500">75% completion rate</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg mb-4">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-1">Những Đơn Đang Chờ</p>
+<h3 id="stat-pending" class="text-2xl font-bold text-gray-900 mb-2">0</h3>                <p class="text-xs text-amber-600 font-medium">Requires attention</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-lg mb-4">
+                    <i class="fa-solid fa-times-circle"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-1">Những Đơn Đã Huỷ</p>
+<h3 id="stat-voided" class="text-2xl font-bold text-gray-900 mb-2">0</h3>                <p class="text-xs text-red-600 font-medium">Requires review</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center mb-6">
+            <div class="flex-grow relative">
+                <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                <input id="searchInput" type="text" placeholder="Tìm kiếm bằng mã đơn hàng hoặc tên nhân viên..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+            </div>
+            <select id="statusFilter" class="border border-gray-300 bg-white py-2 px-4 rounded-lg focus:outline-none">
+                <option value="All">Tất Cả Đơn Hàng</option>
+                <option value="Completed">Đã Hoàn Thành</option>
+                <option value="Pending">Đang Chờ</option>
+            </select>
+            <button class="border border-gray-300 bg-white py-2 px-4 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                <i class="fa-solid fa-filter"></i> Bộ Lọc
+            </button>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wider uppercase">
+                        <th class="p-4">Mã Đơn Hàng</th>
+                        <th class="p-4">Thời Gian</th>
+                        <th class="p-4">Nhân Viên</th>
+                        <th class="p-4">Số Lượng Order</th>
+                        <th class="p-4">Tổng</th>
+                        <th class="p-4">Phương Thức Thanh Toán</th>
+                        <th class="p-4">Trạng Thái</th>
+                        <th class="p-4 text-right">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTableBody" class="divide-y divide-gray-200 text-sm text-gray-800">
+                </tbody>
+        <!-- Dữ liệu cũ đệ hardcode cứ kệ nó, lát JS sẽ ghi đè hết -->
+    </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<!-- ================= TAB: REPORTS & ANALYTICS ================= -->
+<div id="reportsTab" class="mt-12 mb-20 hidden">
+    <div class="flex justify-between items-end mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Business Analytics</h2>
+            <p class="text-gray-500 text-sm mt-1">Comprehensive performance and operations overview</p>
+        </div>
+        <div class="flex gap-3">
+            <select class="border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:border-emerald-500 shadow-sm">
+                <option>Today</option>
+                <option>Last 7 Days</option>
+                <option>This Month</option>
+            </select>
+            <button class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 Khối Thống kê Tổng quan -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <!-- Khối 1 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-dollar-sign"></i></div>
+                <span class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-1 rounded-full">+12.5%</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-1">Total Revenue</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">$12,088</h3>
+            <p class="text-xs text-gray-400">vs. $10,745 last week</p>
+        </div>
+        <!-- Khối 2 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <span class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">+18.2%</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-1">Net Profit</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">$7,365</h3>
+            <p class="text-xs text-gray-400">60.9% margin</p>
+        </div>
+        <!-- Khối 3 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-lg"><i class="fa-solid fa-cart-shopping"></i></div>
+                <span class="bg-purple-50 text-purple-600 text-xs font-bold px-2 py-1 rounded-full">+8.7%</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-1">Total Orders</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">395</h3>
+            <p class="text-xs text-gray-400">56 orders/day avg</p>
+        </div>
+        <!-- Khối 4 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-users"></i></div>
+                <span class="bg-amber-50 text-amber-600 text-xs font-bold px-2 py-1 rounded-full">+5.3%</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-1">Active Staff</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">3</h3>
+            <p class="text-xs text-gray-400">132 orders/staff avg</p>
+        </div>
+    </div>
+
+    <!-- Biểu đồ Đường (Line Chart) -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-gray-900 text-lg">Revenue vs Profit Trend</h3>
+            <span class="text-sm text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> Last 7 Days</span>
+        </div>
+        <div class="w-full h-72">
+            <canvas id="revenueProfitChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Lưới 2 cột cho các biểu đồ nhỏ hơn -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        
+        <!-- Biểu đồ Tròn (Pie Chart) -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <h3 class="font-bold text-gray-900 text-lg mb-6">Sales by Category</h3>
+            <div class="w-full h-64 flex justify-center">
+                <canvas id="salesCategoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bảng xếp hạng Staff (Thiết kế bằng HTML/CSS thuần) -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-gray-900 text-lg">Staff Performance</h3>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Xem Chi Tiết</a>
+            </div>
+            <div class="space-y-6">
+                <!-- Top 1 -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">#1</span>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">John Doe</p>
+                                <p class="text-xs text-gray-500">145 orders</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-900 text-sm">$4532.00</p>
+                            <p class="text-xs text-gray-500">$31.26 avg</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-emerald-600 h-2 rounded-full" style="width: 100%"></div>
+                    </div>
+                </div>
+                <!-- Top 2 -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold flex items-center justify-center text-xs">#2</span>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">Jane Smith</p>
+                                <p class="text-xs text-gray-500">138 orders</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-900 text-sm">$4287.00</p>
+                            <p class="text-xs text-gray-500">$31.07 avg</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-emerald-600 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+                <!-- Top 3 -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold flex items-center justify-center text-xs">#3</span>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">Mike Johnson</p>
+                                <p class="text-xs text-gray-500">112 orders</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-900 text-sm">$3421.00</p>
+                            <p class="text-xs text-gray-500">$30.54 avg</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-emerald-600 h-2 rounded-full" style="width: 70%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../src/js/logout.js"></script>
+<script src="/src/js/api.js"></script>
+<script src="../src/js/manager.js"></script>
+</body>
+</html>

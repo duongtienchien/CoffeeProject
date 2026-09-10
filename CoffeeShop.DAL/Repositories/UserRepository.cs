@@ -14,12 +14,17 @@ namespace CoffeeShop.DAL.Repositories
         }
         public async Task<User> GetUserByEmail(string email)
         {
-            // Dùng LINQ chọc xuống DB lấy User lên cực kỳ nhàn hạ
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            // Nhét ngay Include vào đây để kéo theo cục Profile lên!
+            return await _dbContext.Users
+                .Include(u => u.UserProfile) 
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
-        public async Task<User> GetAdminAccount()
+        public async Task<List<User>> GetAllStaffAsync()
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Role == "Admin");
+            return await _dbContext.Users
+                .Include(u => u.UserProfile)   // Móc luôn bảng Profile sang để lát còn lấy Avatar, SĐT
+                .Where(u => u.Role.ToLower() == "staff") // Lọc ra những ông nào làm Staff
+                .ToListAsync();
         }
     }
 }

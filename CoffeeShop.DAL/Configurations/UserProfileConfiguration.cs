@@ -10,6 +10,7 @@ namespace CoffeeShop.DAL.Configurations
         {
             builder.ToTable("UserProfiles");
             builder.HasKey(e => e.UserId);
+            builder.Property(e => e.UserId).ValueGeneratedNever();
             builder.Property(e => e.FullName).IsRequired().HasMaxLength(50);
             builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
             builder.Property(e => e.Avatar).IsRequired().HasMaxLength(500);

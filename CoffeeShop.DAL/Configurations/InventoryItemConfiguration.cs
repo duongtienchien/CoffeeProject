@@ -8,13 +8,13 @@ namespace CoffeeShop.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<InventoryItem> builder)
         {
-            builder.ToTable("InventoryItem");
+            builder.ToTable("InventoryItems");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Name).IsRequired().HasMaxLength(50);
             builder.Property(e => e.Unit).IsRequired().HasMaxLength(20);
             builder.HasMany(p => p.ProductRecipes)
                    .WithOne(i => i.InventoryItem)
-                   .HasForeignKey(p => p.ProductId)
+                   .HasForeignKey(p => p.ItemId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

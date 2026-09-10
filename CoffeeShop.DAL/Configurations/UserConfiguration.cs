@@ -14,7 +14,7 @@ namespace CoffeeShop.DAL.Configurations
             builder.Property(e => e.Email).IsRequired().HasMaxLength(255).IsUnicode(false);
             builder.Property(e => e.PasswordHash).IsRequired().HasMaxLength(500);
             builder.Property(e => e.Role).IsRequired().HasMaxLength(10).HasDefaultValue("Staff");
-            builder.Property(e => e.FalledLoginAttempts).HasDefaultValue(0);
+            builder.Property(e => e.FailedLoginAttempts).HasDefaultValue(0);
             builder.Property(e => e.LockoutEnd).IsRequired(false); 
             builder.Property(e => e.OtpCode).IsRequired();
             builder.Property(e => e.OtpExpiryTime).HasColumnType("timestamp with time zone");

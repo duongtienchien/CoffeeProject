@@ -36,7 +36,7 @@ namespace CoffeeShop.DAL.Migrations
                         .IsUnicode(false)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<int>("FalledLoginAttempts")
+                    b.Property<int>("FailedLoginAttempts")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
@@ -44,8 +44,9 @@ namespace CoffeeShop.DAL.Migrations
                     b.Property<DateTime?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("OtpCode")
-                        .HasColumnType("integer");
+                    b.Property<string>("OtpCode")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("OtpExpiryTime")
                         .HasColumnType("timestamp with time zone");
@@ -146,7 +147,7 @@ namespace CoffeeShop.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InventoryItem", (string)null);
+                    b.ToTable("InventoryItems", (string)null);
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Catalog.Product", b =>
@@ -191,9 +192,61 @@ namespace CoffeeShop.DAL.Migrations
                     b.Property<decimal>("QuantityNeeded")
                         .HasColumnType("numeric");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("ProductId", "ItemId");
+
+                    b.HasIndex("ItemId");
 
                     b.ToTable("ProductRecipes", (string)null);
+                });
+
+            modelBuilder.Entity("CoffeeShop.Models.Entities.Inventory.InventoryCheck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ActualQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CheckDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Discrepancy")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ManagerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ResolvedTransactionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StoreId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SystemQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ManagerId");
+
+                    b.HasIndex("ResolvedTransactionId");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("InventoryChecks");
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Inventory.InventoryTransaction", b =>
@@ -235,16 +288,13 @@ namespace CoffeeShop.DAL.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreateBy");
 
                     b.HasIndex("ItemId");
 
                     b.HasIndex("StoreId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("InventoryTransactions", (string)null);
                 });
@@ -285,10 +335,12 @@ namespace CoffeeShop.DAL.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric");
 
                     b.HasKey("StoreId", "ItemId");
+
+                    b.HasIndex("ItemId");
 
                     b.ToTable("StoreInventories", (string)null);
                 });
@@ -313,7 +365,7 @@ namespace CoffeeShop.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customer", (string)null);
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Sales.Order", b =>
@@ -322,6 +374,12 @@ namespace CoffeeShop.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("CanceledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -329,6 +387,9 @@ namespace CoffeeShop.DAL.Migrations
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsFraudWarning")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -350,6 +411,8 @@ namespace CoffeeShop.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("StaffId");
 
                     b.HasIndex("StoreId");
 
@@ -381,7 +444,44 @@ namespace CoffeeShop.DAL.Migrations
 
                     b.HasIndex("OrderId");
 
+                    b.HasIndex("ProductId");
+
                     b.ToTable("OrderDetails", (string)null);
+                });
+
+            modelBuilder.Entity("CoffeeShop.Models.Entities.System.ShiftReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("ActualCashAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Difference")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ShiftEndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StoreId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SystemCashAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShiftReports");
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.System.SystemAuditLog", b =>
@@ -449,11 +549,11 @@ namespace CoffeeShop.DAL.Migrations
                 {
                     b.HasOne("CoffeeShop.Models.Entities.Catalog.InventoryItem", "InventoryItem")
                         .WithMany("ProductRecipes")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CoffeeShop.Models.Entities.Catalog.Product", "Products")
+                    b.HasOne("CoffeeShop.Models.Entities.Catalog.Product", "Product")
                         .WithMany("ProductRecipes")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -461,11 +561,51 @@ namespace CoffeeShop.DAL.Migrations
 
                     b.Navigation("InventoryItem");
 
-                    b.Navigation("Products");
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Models.Entities.Inventory.InventoryCheck", b =>
+                {
+                    b.HasOne("CoffeeShop.Models.Entities.Catalog.InventoryItem", "InventoryItem")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoffeeShop.Models.Entities.Auth.User", "Manager")
+                        .WithMany()
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoffeeShop.Models.Entities.Inventory.InventoryTransaction", "ResolvedTransaction")
+                        .WithMany()
+                        .HasForeignKey("ResolvedTransactionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CoffeeShop.Models.Entities.Inventory.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InventoryItem");
+
+                    b.Navigation("Manager");
+
+                    b.Navigation("ResolvedTransaction");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Inventory.InventoryTransaction", b =>
                 {
+                    b.HasOne("CoffeeShop.Models.Entities.Auth.User", "User")
+                        .WithMany()
+                        .HasForeignKey("CreateBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CoffeeShop.Models.Entities.Catalog.InventoryItem", "InventoryItem")
                         .WithMany("InventoryTransactions")
                         .HasForeignKey("ItemId")
@@ -478,12 +618,6 @@ namespace CoffeeShop.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CoffeeShop.Models.Entities.Auth.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("InventoryItem");
 
                     b.Navigation("Store");
@@ -493,11 +627,19 @@ namespace CoffeeShop.DAL.Migrations
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Inventory.StoreInventory", b =>
                 {
+                    b.HasOne("CoffeeShop.Models.Entities.Catalog.InventoryItem", "InventoryItem")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CoffeeShop.Models.Entities.Inventory.Store", "Store")
                         .WithMany("StoreInventories")
                         .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("InventoryItem");
 
                     b.Navigation("Store");
                 });
@@ -510,6 +652,12 @@ namespace CoffeeShop.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CoffeeShop.Models.Entities.Auth.User", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CoffeeShop.Models.Entities.Inventory.Store", "Store")
                         .WithMany("Orders")
                         .HasForeignKey("StoreId")
@@ -517,6 +665,8 @@ namespace CoffeeShop.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Staff");
 
                     b.Navigation("Store");
                 });
@@ -529,7 +679,15 @@ namespace CoffeeShop.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CoffeeShop.Models.Entities.Catalog.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("CoffeeShop.Models.Entities.Auth.User", b =>

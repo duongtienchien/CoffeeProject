@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using CoffeeShop.Models.Entities.Inventory; 
-using CoffeeShop.Models.Entities.Sales;     
 
 namespace CoffeeShop.DAL.Configurations
 {

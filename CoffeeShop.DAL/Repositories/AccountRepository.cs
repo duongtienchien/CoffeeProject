@@ -30,7 +30,7 @@ namespace CoffeeShop.DAL.Repositories
 
             // Bước 2: Thay mật khẩu mới
             user.PasswordHash = newPasswordHash;
-            user.OtpCode = 0;
+            user.OtpCode = "000000";
 
             // Bước 3: CHỈ GỌI LỆNH LƯU XUỐNG DB Ở ĐÂY
             await _context.SaveChangesAsync();

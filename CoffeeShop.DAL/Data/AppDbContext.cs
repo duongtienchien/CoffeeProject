@@ -25,11 +25,17 @@ namespace CoffeeShop.DAL.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<SystemAuditLog> SystemAuditLogs { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<InventoryCheck> InventoryChecks { get; set; }
+
+        public DbSet<ShiftReport> ShiftReports { get; set; }
         //Kỹ thuật Data Seeding (không cần phải Insert dữ liệu mỗi khi xoá database)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Bước "lấy khung" của Bố 
             base.OnModelCreating(modelBuilder);
+            // 1. Thiết lập khóa chính phức hợp cho bảng ProductRecipe
+            modelBuilder.Entity<ProductRecipe>()
+                        .HasKey(pr => new { pr.ProductId, pr.ItemId });
             // Nó sẽ tự tìm tất cả các class kế thừa IEntityTypeConfiguration trong project này và nạp vào.
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }

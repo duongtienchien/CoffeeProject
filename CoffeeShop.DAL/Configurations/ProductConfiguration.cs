@@ -15,7 +15,7 @@ namespace CoffeeShop.DAL.Configurations
             builder.Property(e => e.Image).IsRequired().HasMaxLength(500);
             builder.Property(e => e.CategoryId);
             builder.HasMany(pr => pr.ProductRecipes)
-                   .WithOne(p => p.Products)
+                   .WithOne(p => p.Product)
                    .HasForeignKey(o => o.ProductId)
                    .OnDelete(DeleteBehavior.Cascade);
         }

@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 
 # Bỏ qua file solution cũ vì dự án dùng định dạng .slnx
 *.sln
+
+appsettings.json
+appsettings.Development.json

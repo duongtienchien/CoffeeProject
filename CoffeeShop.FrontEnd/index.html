@@ -58,29 +58,12 @@
                     <p id="blankPasswordError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Mật khẩu đang bị để trống!</p>
                     <p id="minimumPasswordError" class="hidden text-xs text-red-500 mt-1 font-medium italic">❌ Mật khẩu phải có tối thiểu 8 ký tự!</p>
                 </div>
-
-                <div class="flex justify-end mb-2">
-                    <button type="button" class="text-xs text-amber-700 hover:text-amber-900 font-semibold underline">Quên mật khẩu?</button>
-                </div>
-
                 <button id = "btn-login" type="submit" class="w-full py-3 bg-gradient-to-r from-amber-700 to-amber-900 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-0.5">
                     Đăng Nhập
                 </button>
             </form>
         </div>
     </div>
-
-    <div id="admin-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 rounded-2xl p-8 max-w-sm w-full border border-slate-700 shadow-2xl">
-            <h2 class="text-xl font-bold text-red-500 text-center mb-4">KHU VỰC QUẢN TRỊ VIÊN</h2>
-            <input type="password" id="keyInput" placeholder="Nhập mã bí mật..." class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white mb-4 focus:outline-none focus:border-red-500">
-            <div class="flex gap-3">
-                <button onclick="closeAdminModal()" class="flex-1 py-2 bg-slate-700 text-white rounded-lg">Hủy</button>
-                <button onclick="loginAdmin()" class="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold">Truy cập</button>
-            </div>
-        </div>
-    </div>
-
     <script src="src/js/login.js"></script>
 </body>
 </html>

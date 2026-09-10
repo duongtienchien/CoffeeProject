@@ -5,6 +5,6 @@ namespace CoffeeShop.DAL.Interfaces
     {
         //Có nhiệm vụ lấy email và trả về thông tin người dùng dùng (nếu có)
         Task<User> GetUserByEmail(string email);
-        Task<User> GetAdminAccount();
+        Task<List<User>> GetAllStaffAsync();
     }
 }

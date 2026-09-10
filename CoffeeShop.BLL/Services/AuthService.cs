@@ -1,6 +1,4 @@
-using CoffeeShop.DAL.Repositories;
 using CoffeeShop.BLL.Interfaces;
-using CoffeeShop.BLL.Services;
 using CoffeeShop.DAL.Interfaces;
 using CoffeeShop.BLL.DTOs.Inventory.Requests;
 using CoffeeShop.BLL.DTOs.Inventory.Responses;
@@ -27,7 +25,6 @@ namespace CoffeeShop.BLL.Services
         //Trả về ĐÚNG kiểu LoginResponses để khớp với Interface!
         public async Task<LoginResponses> Login(LoginRequests request)
         {
-            // 1. Phải có CHỦ NGỮ (_userRepository) và biến HỨNG DỮ LIỆU (userInDb)
             var userInDb = await _userRepository.GetUserByEmail(request.Email);
 
             // 2. Không tìm thấy User trong Database -> Đuổi về
@@ -46,33 +43,14 @@ namespace CoffeeShop.BLL.Services
                 await _bruteForceService.CountBruteForce(userInDb);
                 throw new UnauthorizedAccessException("Sai mật khẩu!");
             }
-            await _bruteForceService.ResetFalledAttemptAsync(userInDb);
-            string realToken = _tokenService.GenerateJwtToken(userInDb.Email, userInDb.Role);
+            await _bruteForceService.ResetFailedAttemptAsync(userInDb);
+            var fullName = userInDb.UserProfile?.FullName ?? "Chưa cập nhật tên";
+            string realToken = _tokenService.GenerateJwtToken(userInDb.Email, userInDb.Role, userInDb.Id, fullName);
             return new LoginResponses
             {
                 Role = userInDb.Role,
-                Token = realToken
-            };
-        }
-        // Trong AuthService.cs (Nhớ khai báo cả ở IAuthService nhé)
-        public LoginResponses VerifyBackdoor(string inputKey)
-        {
-            // Lấy chìa khóa từ két sắt (appsettings.json)
-            var correctKey = _configuration["AdminSettings:BackdoorKey"];
-
-            if (inputKey != correctKey)
-            {
-                return null; // Sai key thì trả về null (hoặc ném Exception)
-            }
-
-            // 1. Nặn Token thật cho Admin quản trị hệ thống
-            string realJwtToken = _tokenService.GenerateJwtToken("admin@khoahoc.vn", "Admin");
-
-            // 2. Đóng gói trả về DTO
-            return new LoginResponses
-            {
-                Role = "Admin",
-                Token = realJwtToken
+                Token = realToken,
+                StoreId = userInDb.StoreId ?? 1
             };
         }
     }

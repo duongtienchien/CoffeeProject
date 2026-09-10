@@ -7,6 +7,5 @@ namespace CoffeeShop.BLL.Interfaces
     {
         //Đầu vào là hộp Requests, đầu ra là hộp Responses!
         Task<LoginResponses> Login(LoginRequests request);
-        LoginResponses VerifyBackdoor(string inputKey);
     }
 }
