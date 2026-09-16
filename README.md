@@ -96,4 +96,4 @@ Hệ thống đã nạp sẵn các tài khoản phân quyền mẫu phục vụ 
 ## Tác Giả (Author)
 
 * **Dương Tiến Chiến** – *Backend Developer*
-* **GitHub:** [@ChinChin2k5](https://github.com/ChinChin2k5)
+* **GitHub:** [(https://github.com/duongtienchien)
